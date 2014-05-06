@@ -1,7 +1,7 @@
 # python3.3
 # ulysses2md_export_sync_1_0_1.py
 
-# 2014-05-05, 22:44 EDT
+# 2014-05-06, 16:40
 # GNU (cl) 2014 @RoyRogers56
 # Only tested with python 3.3 on OS X 10.9
 # Free to use and improve. Not for sale.

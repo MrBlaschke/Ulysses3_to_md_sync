@@ -137,6 +137,7 @@ def write_package(ul_path, ul_package, xml_text, modified):
         update_info_plist(ul_path_package)
 
     shutil.copytree(ul_cache, ul_path_package)
+    set_file_date(ul_path_package, modified)
 
     if os.path.exists(ul_cache):
         shutil.rmtree(ul_cache)

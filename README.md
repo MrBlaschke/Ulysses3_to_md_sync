@@ -39,20 +39,20 @@ In addition also copied to a top-level media folder for each top-level group,
 so top-level Marked-file can access media.  
 (Marked does not otherwise link media for md-files in sub folders)
 6. Syncing should work even if sheets or md-files have been reorganized since last sync.  
-Sync matching is based on UUID
+Sync-matching is based on common UUID
 
 ## Limitations (by design)
 1. Attachments are only exported for reference (in HTML comment block), but are kept untouched on sync/import
 2. Does not support changes to, or additional media files on sync-import
 3. New links to external media-files will be imported on sync though.
-3. On sync-conflicts new sheets will appear in Inbox (attachments only as plain text).  
-The original sheets are left untouched.
+3. On sync-conflicts, new sheets will appear in Inbox (attachments only as plain text).  
+The original sheets are then left untouched.
 4. No automatic snapshots of sheets before sync-import, but versions by manual saves (cmd+S), are kept intact.
 
 **Disclaimer:**  
-This is a working prototype.  
-Please use on your own risk.   
-Please fix and improve!
+This is a prototype, quick-and-dirty, but is should work ok.
+Check it out, and use at your own risk.  
+Feel free to fix and improve!
 
 Uses "terminal-notifier" or "growlnotify"   
 (If not installed, prints to console instead)  

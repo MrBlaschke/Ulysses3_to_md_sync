@@ -4,7 +4,7 @@
 **Python 3.3 script backups, exports, converts, and syncs Ulysses3 XML library files,  
 to and from Markdown with Critic Markup. Roundtrip safe.**
 
-> GNU (cl) 2014 @RoyRogers56, 2014-05-06    
+> GNU (cl) 2014 @RoyRogers56, 2014-05-07    
 **Only tested with python 3.3 on OS X 10.9**  
 Free to use and improve. Not for sale.  
 
@@ -40,9 +40,14 @@ so top-level Marked-file can access media.
 (Marked does not otherwise link media for md-files in sub folders)
 6. Syncing should work even if sheets or md-files have been reorganized since last sync.  
 Sync matching is based on UUID
-7. Ulysses III v1.2 need to be restarted to see **changes** in synced files.  
-This issue is pending, but should be fixed soon.
-8. New files and sync conflicts will also appear in Inboxes (without need for restart.) 
+
+## Limitations (by design)
+1. Attachments are only exported for reference (in HTML comment block), but are kept untouched on sync/import
+2. Does not support changes to, or additional media files on sync-import
+3. New links to external media-files will be imported on sync though.
+3. On sync-conflicts new sheets will appear in Inbox (attachments only as plain text).  
+The original sheets are left untouched.
+4. No automatic snapshots of sheets before sync-import, but versions by manual saves (cmd+S), are kept intact.
 
 **Disclaimer:**  
 This is a working prototype.  

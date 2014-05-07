@@ -50,9 +50,9 @@ The original sheets are then left untouched.
 4. No automatic snapshots of sheets before sync-import, but versions by manual saves (cmd+S), are kept intact.
 
 **Disclaimer:**  
-This is a prototype, quick-and-dirty, but is should work ok.
+This is a prototype, quick-and-dirty, but is should work ok.  
 Check it out, and use at your own risk.  
-Feel free to fix and improve!
+Feel free to fix and improve!  
 
 Uses "terminal-notifier" or "growlnotify"   
 (If not installed, prints to console instead)  

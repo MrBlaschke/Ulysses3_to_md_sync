@@ -1,7 +1,7 @@
 # python3.3
 # ulysses_sync_lib_1_0_2.py
 
-# 2014-05-07, 16:25
+# 2014-05-07, 19:40
 # GNU (cl) 2014 @RoyRogers56
 # Free to use and improve. Not for sale.
 # Python Library to be imported and work with "ulysses2md_export_sync_1_0_0.py"

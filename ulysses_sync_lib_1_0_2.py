@@ -1,14 +1,13 @@
 # python3.3
-# ulysses_sync_lib_1_0_1.py
+# ulysses_sync_lib_1_0_2.py
 
-# 2014-05-06, 16:40
+# 2014-05-07, 16:25
 # GNU (cl) 2014 @RoyRogers56
 # Free to use and improve. Not for sale.
 # Python Library to be imported and work with "ulysses2md_export_sync_1_0_0.py"
 
 from xml.dom import minidom
 import datetime
-# import time
 import xml.etree.ElementTree as ET
 from os import walk
 import os
@@ -16,6 +15,10 @@ import re
 import uuid
 import subprocess
 import plistlib
+import shutil
+
+# Users home folder:
+HOME = os.getenv("HOME", "") + "/"
 
 use_critic_markup = True  # Change to switch between Critic Markup or HTML markup on export.
                            # Sync / import will accept either, independently of this switch.
@@ -96,6 +99,47 @@ def set_file_date(filename, ts):
     ts_int = int(ts_fl)
     os.utime(filename, (-1, ts_int))
     return ts_int
+
+
+def write_package(ul_path, ul_package, xml_text, modified):
+    temp_path = HOME + ".ulysses_temp_cache/"
+
+    # Test XML, and write Ulysses package with XML + text files
+    try:
+        xml_doc = ET.fromstring(xml_text)
+        md_text = ET.tostring(xml_doc.find("string"), "unicode", "text")
+        # debug(112, md_text, stop=False)
+    except Exception as inst:
+        print(inst.args)
+        debug(115, xml_text, True, False)
+        print("*** See line 110 in Ulib: File did not vaidate as XML, ", ul_path, ul_package)
+        # *** Maybe add some more error handling here!
+        return
+
+    ul_cache = temp_path + ul_package
+    if not os.path.exists(ul_cache):
+        os.makedirs(ul_cache)
+
+    xml_file = ul_cache + "Content.xml"
+    txt_file = ul_cache + "Text.txt"
+
+    write_file_modified(xml_file, xml_text, modified)
+    write_file_modified(txt_file, md_text, modified)
+
+    ul_path_package = ul_path + ul_package
+
+    # Deleting and copying package from cache,
+    # ensures that Ulysses will discover updated packages:
+    # Ulysses is monitoring the package's "Added Date" (OS-X Lion and newer)
+    if os.path.exists(ul_path_package):
+        shutil.rmtree(ul_path_package)
+    else:
+        update_info_plist(ul_path_package)
+
+    shutil.copytree(ul_cache, ul_path_package)
+
+    if os.path.exists(ul_cache):
+        shutil.rmtree(ul_cache)
 
 
 def write_file_modified(filename, file_content, modified):
@@ -1192,7 +1236,7 @@ def sync_files(sync_path, ulysses_path, log):
 
                         msg = ""
                         comment = ""
-
+                        ul_package = ""
                         match = re.search(r"^(.+? - )?([0-9a-f]{32})\.md$", fname)
                         if match:
                             ul_uuid = match.group(2)
@@ -1203,14 +1247,15 @@ def sync_files(sync_path, ulysses_path, log):
                                 msg = "Sheet deleted in Ulysses? In group: " + source_group
 
                                 comment = msg + "\nExternal edit at: " + file_date_time
-                                ul_path = inbox_path + uuid.uuid4().hex + ".ulysses/"
+                                ul_path = inbox_path  # + uuid.uuid4().hex + ".ulysses/"
+                                ul_package = uuid.uuid4().hex + ".ulysses/"
                                 notify("New sheet in inbox, " + msg + " " + file_title)
                                 log.add_line("New sheet from: ", file_date_time_0, file_title)
 
                             else:
-                                ul_path = ul_match + ul_uuid + ".ulysses/"
-
-                                if check_files(sync_file, full_name, ul_path + "Content.xml"):
+                                ul_path = ul_match  # + ul_uuid + ".ulysses/"
+                                ul_package = ul_uuid + ".ulysses/"
+                                if check_files(sync_file, full_name, ul_path + ul_package + "Content.xml"):
                                 # Updating existing sheet:
                                     msg = "External edit: "
                                     keep_attachments = True
@@ -1224,7 +1269,8 @@ def sync_files(sync_path, ulysses_path, log):
                                     msg = "Sync conflict with sheet in group: " + source_group
                                     comment = msg + "\nExternal edit at: " + file_date_time\
                                         + "\nNOTE! Attachments only as plaintext, at end of sheet"
-                                    ul_path = inbox_path + uuid.uuid4().hex + ".ulysses/"
+                                    ul_path = inbox_path  # + uuid.uuid4().hex + ".ulysses/"
+                                    ul_package = uuid.uuid4().hex + ".ulysses/"
                                     notify("SYNC CONFLICT! See Inbox: " + file_title)
                                     log.add_line("SYNC CONFLICT! with: ", file_date_time_0,
                                                  file_title)
@@ -1234,49 +1280,17 @@ def sync_files(sync_path, ulysses_path, log):
                             msg = 'New sheet from export folder: ' + source_group
                             comment = msg + "\nExternal edit at: " + file_date_time
 
-                            ul_path = inbox_path + uuid.uuid4().hex + ".ulysses/"
+                            ul_path = inbox_path  # + uuid.uuid4().hex + ".ulysses/"
+                            ul_package = uuid.uuid4().hex + ".ulysses/"
                             notify("New sheet in inbox: " + file_title)
                             log.add_line("New sheet from: ", file_date_time_0, file_title)
 
                         # Markdown to Ulysses Xml converions is done here:
-                        xml_text = markdown_to_ulysses_xml(md_text, ul_path, comment,
+                        xml_text = markdown_to_ulysses_xml(md_text, ul_path + ul_package, comment,
                                                            keep_attachments)
 
-                        # Test XML, and write Ulysses package with XML + text files
-                        try:
-                            validate = ET.fromstring(xml_text)
-                        except Exception as inst:
-                            print(inst.args)
-                            debug(1199, xml_text, True, False)
-                            debug(1200, ul_path, full_name)
-                            # print("*** Line 1206: File did not vaidate as XML, ", full_name)
-                            # *** Add some error handling and messaging here!
-                            pass
-
-                        xml_file = ul_path + "Content.xml"
-                        txt_file = ul_path + "Text.txt"
-
-                        if not os.path.exists(ul_path):
-                            update_info_plist(ul_path)
-                            os.makedirs(ul_path)
-                        else:
-                            set_file_date(ul_path, modified)
-
-                        # In UL v1.1.2, set_file_date trigered refresh editor and sheet-list panes
-                        # Not working after UL 1.2 update, need to restart UL to see changes :(
-                            # # Touch UlGroup
-                            # pos = ul_path.rfind("/", 0, -2)
-                            # ul_group = ul_path[:pos]
-                            # set_file_date(ul_group, time.time())
-                            # # print(pos, ul_group)
-                            # # quit()
-
-                        # Testing for UL v1.2 to refresh "hot-swap", but not working after update:
-                            #ul_info = ul_match + "Info.ulgroup"
-                            #set_file_date(ul_info, modified)
-
-                        write_file_modified(xml_file, xml_text, modified)
-                        write_file_modified(txt_file, md_text, modified)
+                        # Test XML, and write Ulysses package with XML-file + text-file
+                        write_package(ul_path, ul_package, xml_text, modified)
 
                     #endif ts > last_synced
                 #endif fname.endswith(".md")

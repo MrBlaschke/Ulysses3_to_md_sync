@@ -1,7 +1,7 @@
 # python3.3
-# ulysses2md_export_sync_1_0_1.py
+# ulysses2md_export_sync_1_0_2.py
 
-# 2014-05-06, 16:40
+# 2014-05-07, 16:25
 # GNU (cl) 2014 @RoyRogers56
 # Only tested with python 3.3 on OS X 10.9
 # Free to use and improve. Not for sale.
@@ -43,14 +43,9 @@
 # 6) Syncing should work even if sheets or md-files have been reorganized since last sync.
 #    Syncing of changed back to Ulysses is based on matching sheet and md-files with same UUID
 
-# 7) Ulysses III v1.2 need to be restarted to see **changes** in synced files.
-#    (For some reason not neccessary in v1.1.2)
-#    New files and sync conflicts will appear in Inboxes, without need for restart.
-#    (Also no need to restart if only export.)
-
 # **Disclaimer:**
 # This is a working prototype.
-# Please use on your own risk, or rather fix and improve!
+# Please use on your own risk, feel free to fix and improve!
 
 # Uses "terminal-notifier" or "growlnotify" (If not installed, prints to console instead)
 # Get the free "terminal-notifier" at:
@@ -63,7 +58,7 @@ import os
 import subprocess
 import datetime
 import re
-import ulysses_sync_lib_1_0_1 as Ulib  # Main library for syncing, xml2md- and md2xml-conversions.
+import ulysses_sync_lib_1_0_2 as Ulib  # Main library for syncing, xml2md- and md2xml-conversions.
 
 make_marked_files = True  # If True: Make Marked-files on top and bottom group level.
 add_ul_uuid_to_export_filenames = True  # Have to be True to sync changes back to same Sheet
@@ -249,14 +244,17 @@ def export_files(file_list, sync_temp, md_joined_path, last_synced, log, sync_pa
 #end_def export_files
 
 
-def main(ulysses_path, sync_temp, sync_path, md_joined_path):
+def main(ulysses_path, sync_path, md_joined_path):
     print()
     print("==============================================================================")
     print("Exporting files ...")
     print("From:", ulysses_path)
     print(" --> ", sync_path)
     print()
-    # inbox_path = ulysses_path + "Unfiled-ulgroup/"
+
+    # WARNING! DO NOT CHANGE THIS FOLDER/ PATH:
+    sync_temp = HOME + ".ulysses_temp/"
+
     ulgroup_path = ulysses_path + "Groups-ulgroup/"
     file_list = ""
     last_synced = 0
@@ -313,7 +311,14 @@ def main(ulysses_path, sync_temp, sync_path, md_joined_path):
     sync_file = sync_path + ".ulysses_sync.log"
     Ulib.write_file(sync_file, file_list)
 
-    shutil.rmtree(sync_temp)
+    # Extra check, just to make sure nothing bad happens:
+    if sync_temp == HOME or sync_temp.endswith(".") \
+            or sync_temp.strip() == "" or sync_temp.strip() == "/":
+        print("*** Warning BAD temp-folder name:", sync_temp)
+        print("*** Program aborted! Fix it in line 261!!")
+        quit()
+    else:
+        shutil.rmtree(sync_temp)
 
     print()
     print("Export Done to: " + sync_path)
@@ -324,7 +329,10 @@ def main(ulysses_path, sync_temp, sync_path, md_joined_path):
 #end_def main(ulysses_path, sync_path):
 
 
-# Main Program:
+# ================
+# = Main Script =
+# ================
+
 main_log = ""
 
 HOME = os.getenv("HOME", "") + "/"
@@ -336,25 +344,17 @@ ulysses_path_icloud = HOME + "Library/Mobile Documents/X5AZV975AG~com~soulmen~ul
 ulysses_path_demo = HOME + "Library/Containers/com.soulmen.ulysses3.demo/Data/"\
     + "Documents/Library/"
 
-sync_temp = HOME + "ulysses_temp/"
-
-# if os.path.exists(sync_temp):
-#     print("*** WARNING!! This folder already exists:", sync_temp)
-#     print("*** Rename, or delete manually if sure it contains only temp files! ***")
-#     print("*** Then restart this script ***")
-#     quit()
-
 backup_ulysses(ulysses_path_mac, backup_path, "On My Mac")
 backup_ulysses(ulysses_path_icloud, backup_path, "iCloud")
 
 main_log += "Synced from: " + sync_path_mac + "\n"
-main_log += main(ulysses_path_mac, sync_temp, sync_path_mac, md_joined_path + "On My Mac/")
+main_log += main(ulysses_path_mac, sync_path_mac, md_joined_path + "On My Mac/")
 
 main_log += "\nSynced from: " + sync_path_icloud + "\n"
-main_log += main(ulysses_path_icloud, sync_temp, sync_path_icloud, md_joined_path + "iCloud/")
+main_log += main(ulysses_path_icloud, sync_path_icloud, md_joined_path + "iCloud/")
 
 # main_log += "\nSynced from: " + sync_path_demo + "\n"
-# main_log += main(ulysses_path_demo, sync_temp, sync_path_demo, md_joined_path + "Demo/")
+# main_log += main(ulysses_path_demo, sync_path_demo, md_joined_path + "Demo/")
 
 # print()
 print()

@@ -4,7 +4,7 @@
 **Python 3.3 script backups, exports, converts, and syncs Ulysses3 XML library files,  
 to and from Markdown with Critic Markup. Roundtrip safe.**
 
-> (MIT) (c) 2014 @RoyRogers56, 2014-05-07    
+> (MIT) (c) 2014 RoyRogers56, 2014-05-07    
 **Only tested with python 3.3 on OS X 10.9**  
 Free to use and improve. Not for sale.  
 

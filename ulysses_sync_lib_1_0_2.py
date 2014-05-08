@@ -1,7 +1,7 @@
 # python3.3
 # ulysses_sync_lib_1_0_2.py
 
-# 2014-05-07, 19:40
+# 2014-05-07, 20:18
 # GNU (cl) 2014 @RoyRogers56
 # Free to use and improve. Not for sale.
 # Python Library to be imported and work with "ulysses2md_export_sync_1_0_0.py"
@@ -269,8 +269,8 @@ class UlyssesToMarkdown:
                     md_line += child.data
             elif document.tagName == 'tag':
                 if child.nodeType == child.TEXT_NODE:
-                    #print(child.data)
-                    md_line += re.sub(r"^[ \t]*''", r"\t", child.data)
+                    # All tags, but converts codeblock '' to tab here:
+                    md_line += re.sub(r"^[ \t]*'' ?", r"\t", child.data)
             elif document.tagName == 'tags':
                 pass
             elif document.tagName == 'escape':
